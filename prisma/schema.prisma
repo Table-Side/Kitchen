@@ -8,7 +8,7 @@ datasource db {
 }
 
 model KitchenOrder {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -17,7 +17,7 @@ model KitchenOrder {
 }
 
 model KitchenOrderItem {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
