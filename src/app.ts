@@ -37,7 +37,7 @@ class App {
 
     routes() {
         // Order routes
-        this.server.use("/orders/:restaurantId", routers.order);
+        this.server.use("/kitchen/:restaurantId", routers.kitchen);
 
         // 404
         this.server.use((req, res, next) => {

@@ -1,1 +1,1 @@
-export { default as order } from "./order.routes"; 
+export { default as kitchen } from "./kitchen.routes"; 
