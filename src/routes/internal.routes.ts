@@ -1,12 +1,14 @@
 import { Router, Request, Response } from "express";
 import prisma from "../config/prisma";
+import { OrderItem } from "@prisma/client";
 
 const router = Router();
 
-router.post("/orders/receive", async (req: Request, res: Response) => {
+router.post("/orders/:restaurantId/receive", async (req: Request, res: Response) => {
     // Receive a new order from the order microservice
     try {
-        const { orderId, items } = req.body;
+        const { restaurantId } = req.params;
+        const { orderId, userId, items } = req.body;
         
         // Fetch details of items
         const itemIds = items.map((item: {itemId: string, quantity: number}) => item.itemId);
@@ -21,9 +23,11 @@ router.post("/orders/receive", async (req: Request, res: Response) => {
         const itemDetails = await itemDetailsReq.json();
         
         // Create Kitchen Order
-        const kitchenOrder = await prisma.kitchenOrder.create({
+        const kitchenOrder = await prisma.order.create({
             data: {
-                orderId
+                orderId,
+                restaurantId,
+                userId,
             }
         });
 
@@ -35,10 +39,52 @@ router.post("/orders/receive", async (req: Request, res: Response) => {
             });
         }
 
-        // Create Kitchen Order Item
-        const kitchenOrderItem = itemDetails.map((item) => {
-            
-        })
+        // Create Kitchen Order Items
+        const kitchenOrderItemUpdates = itemDetails.map((item: { id: string, displayName: string, shortName: string }) => {
+            // Find corresponding item in order
+            const matchingOrderItem = items.find((orderItem: { itemId: string, quantity: number }) => orderItem.itemId === item.id);
+
+            return prisma.orderItem.create({
+                data: {
+                    prettyName: item.displayName,
+                    shortName: item.shortName,
+                    quantity: matchingOrderItem.quantity,
+                    kitchenOrderId: kitchenOrder.id,
+                }
+            })
+        });
+        await prisma.$transaction(kitchenOrderItemUpdates);
+
+        // Add initial order status
+        const initialOrderStatus = await prisma.orderStatus.create({
+            data: {
+                status: "PENDING",
+                kitchenOrderId: kitchenOrder.id,
+            }
+        });
+
+        if (!initialOrderStatus) {
+            return res.status(500).json({
+                error: {
+                    message: "Order status cannot be created"
+                }
+            });
+        }
+
+        // Get order details
+        const order = await prisma.order.findUnique({
+            where: {
+                id: orderId,
+            },
+            include: {
+                items: true,
+                status: true,
+            },
+        });
+
+        return res.status(200).json({
+            data: order
+        });
     } catch (error) {
         res.status(500).json({
             error: {
