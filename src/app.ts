@@ -38,6 +38,9 @@ class App {
     routes() {
         // Order routes
         this.server.use("/kitchen/:restaurantId", routers.kitchen);
+        
+        // Internal routes
+        this.server.use("/internal", routers.internal);
 
         // 404
         this.server.use((req: Request, res: Response, next: NextFunction) => {
