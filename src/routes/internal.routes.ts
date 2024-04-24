@@ -54,28 +54,6 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
 
         console.log(`Created kitchen order ${kitchenOrder.id} for order ${orderId}`)
 
-        // Create Kitchen Order Items
-        const kitchenOrderedItemUpdates = itemDetails.map((item: { id: string, displayName: string, shortName: string }) => {
-            // Find corresponding item in order
-            const matchingOrderedItem = items.find((orderedItem: { itemId: string, quantity: number }) => orderedItem.itemId === item.id);
-
-            return prisma.orderedItem.create({
-                data: {
-                    prettyName: item.displayName,
-                    shortName: item.shortName,
-                    quantity: matchingOrderedItem.quantity,
-                    kitchenOrder: {
-                        connect: {
-                            id: kitchenOrder.id
-                        }
-                    }
-                }
-            })
-        });
-        await prisma.$transaction(kitchenOrderedItemUpdates);
-
-        console.log(`Added ordered items to kitchen order ${kitchenOrder.id} for order ${orderId}`)
-
         // Add initial order status
         const orderStatus = await prisma.orderStatus.create({
             data: {
@@ -93,6 +71,28 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         }
 
         console.log(`Order status added to kitchen order ${kitchenOrder.id} for order ${orderId}`)
+
+        // Create Kitchen Order Items
+        const kitchenOrderedItemUpdates = itemDetails.map((item: any) => {
+            // Find corresponding item in order
+            const orderedItem = items.find((orderedItem: { itemId: string, quantity: number }) => orderedItem.itemId === item.id);
+
+            return prisma.orderedItem.create({
+                data: {
+                    prettyName: item.displayName,
+                    shortName: item.shortName,
+                    quantity: orderedItem.quantity,
+                    kitchenOrder: {
+                        connect: {
+                            id: kitchenOrder.id
+                        }
+                    }
+                }
+            })
+        });
+        await prisma.$transaction(kitchenOrderedItemUpdates);
+
+        console.log(`Added ordered items to kitchen order ${kitchenOrder.id} for order ${orderId}`)
 
         // Get order details
         const order = await prisma.order.findUnique({
