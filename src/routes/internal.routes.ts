@@ -12,7 +12,7 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         
         // Fetch details of items
         const itemIds = items.map((item: {itemId: string, quantity: number}) => item.itemId);
-        const itemDetailsReq = await fetch(`${process.env.RESTAURANT_SERVICE_URL}/internal/items`, {
+        const itemDetailsReq = await fetch(`http://${process.env.RESTAURANT_SERVICE_URL ?? 'restaurant:3000'}/internal/items`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -34,7 +34,7 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         if (!kitchenOrder) {
             return res.status(500).json({
                 error: {
-                    message: "Order cannot be created"
+                    message: "Kitchen order cannot be created"
                 }
             });
         }
@@ -58,7 +58,7 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         // Add initial order status
         const initialOrderStatus = await prisma.orderStatus.create({
             data: {
-                status: "PENDING",
+                status: "IN_PROGRESS",
                 kitchenOrderId: kitchenOrder.id,
             }
         });

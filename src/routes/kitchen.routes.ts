@@ -14,14 +14,12 @@ router.get("/:restaurantId/orders/:status", isAuthenticated, async (req: Authent
         // Filter out orders that are not pending and sort by time
         const status = () => {
             switch (req.params.status) {
-                case "pending":
-                    return "PENDING";
                 case "in-progress":
                     return "IN_PROGRESS";
                 case "completed":
                     return "COMPLETED";
-                case "rejected":
-                    return "REJECTED";
+                case "cancelled":
+                    return "CANCELLED";
                 default:
                     return null;
             }
@@ -35,7 +33,7 @@ router.get("/:restaurantId/orders/:status", isAuthenticated, async (req: Authent
             return;
         }
 
-        // Fetch all orders, including the status updates
+        // Fetch all orders, including the status
         let orders = await prisma.order.findMany({
             where: {
                 restaurantId,
@@ -56,7 +54,7 @@ router.get("/:restaurantId/orders/:status", isAuthenticated, async (req: Authent
 
         if (!status) {
             // Filter orders by desired status
-            
+            orders = orders.filter((order: any) => order.status.status === status);
         }
 
         // Sort orders by recency
@@ -113,7 +111,7 @@ router.get("/:orderId/details", orderExists, async (req: AuthenticatedRequest, r
     }
 });
 
-router.put("/:orderId/status/update/:newStatus", isAuthenticated, hasRole("restaurant"), orderExists, async (req: AuthenticatedRequest, res: Response) => {
+router.put("/:orderId/status/:newStatus", isAuthenticated, hasRole("restaurant"), orderExists, async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { orderId } = req.params;
 
@@ -128,9 +126,6 @@ router.put("/:orderId/status/update/:newStatus", isAuthenticated, hasRole("resta
                 break;
             case "cancel":
                 newStatus = Status.CANCELLED; // Order is cancelled after being accepted
-                break;
-            case "reject":
-                newStatus = Status.REJECTED; // Order cannot be accepted
                 break;
         };
         if (!newStatus) {
