@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import prisma from "../config/prisma";
-import { OrderItem } from "@prisma/client";
+import { OrderedItem } from "@prisma/client";
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
                 "Content-Type": "application/json",
                 "X-Request-From": "tableside-kitchen"
             },
-            body: JSON.stringify({ itemIds }),
+            body: JSON.stringify({ itemIds: itemIds }),
         });
         const itemDetails = await itemDetailsReq.json();
         
@@ -40,20 +40,20 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         }
 
         // Create Kitchen Order Items
-        const kitchenOrderItemUpdates = itemDetails.map((item: { id: string, displayName: string, shortName: string }) => {
+        const kitchenOrderedItemUpdates = itemDetails.map((item: { id: string, displayName: string, shortName: string }) => {
             // Find corresponding item in order
-            const matchingOrderItem = items.find((orderItem: { itemId: string, quantity: number }) => orderItem.itemId === item.id);
+            const matchingOrderedItem = items.find((OrderedItem: { itemId: string, quantity: number }) => OrderedItem.itemId === item.id);
 
-            return prisma.orderItem.create({
+            return prisma.orderedItem.create({
                 data: {
                     prettyName: item.displayName,
                     shortName: item.shortName,
-                    quantity: matchingOrderItem.quantity,
+                    quantity: matchingOrderedItem.quantity,
                     kitchenOrderId: kitchenOrder.id,
                 }
             })
         });
-        await prisma.$transaction(kitchenOrderItemUpdates);
+        await prisma.$transaction(kitchenOrderedItemUpdates);
 
         // Add initial order status
         const initialOrderStatus = await prisma.orderStatus.create({
