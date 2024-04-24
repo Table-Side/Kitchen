@@ -85,13 +85,13 @@ router.get("/:orderId", orderExists, async (req: AuthenticatedRequest, res: Resp
     }
 });
 
-router.put("/:orderId/:newStatus", isAuthenticated, hasRole("restaurant"), orderExists, async (req: AuthenticatedRequest, res: Response) => {
+router.put("/:orderId/:targetStatus", isAuthenticated, hasRole("restaurant"), orderExists, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { orderId } = req.params;
+        const { orderId, targetStatus } = req.params;
 
         // Determine the new status
         let newStatus: Status = null;
-        switch (req.params.newStatus) {
+        switch (targetStatus) {
             case "complete":
                 newStatus = Status.COMPLETED; // Order is ready to be taken to customer/fulfilled
                 break;
