@@ -9,6 +9,8 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
     try {
         const { restaurantId } = req.params;
         const { orderId, userId, items } = req.body;
+
+        console.log(`Received order ${orderId}`);
         
         // Fetch details of items
         const itemIds = items.map((item: {itemId: string, quantity: number}) => item.itemId);
@@ -20,7 +22,18 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
             },
             body: JSON.stringify({ itemIds: itemIds }),
         });
+
+        if (!itemDetailsReq.ok) {
+            return res.status(500).json({
+                error: {
+                    message: "Failed to fetch item details"
+                }
+            });
+        }
+
         const itemDetails = await itemDetailsReq.json();
+
+        console.log(`Received item details for order ${orderId}`);
         
         // Create Kitchen Order
         const kitchenOrder = await prisma.order.create({
@@ -39,6 +52,8 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
             });
         }
 
+        console.log(`Created kitchen order ${kitchenOrder.id} for order ${orderId}`)
+
         // Create Kitchen Order Items
         const kitchenOrderedItemUpdates = itemDetails.map((item: { id: string, displayName: string, shortName: string }) => {
             // Find corresponding item in order
@@ -55,21 +70,25 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         });
         await prisma.$transaction(kitchenOrderedItemUpdates);
 
+        console.log(`Added ordered items to kitchen order ${kitchenOrder.id} for order ${orderId}`)
+
         // Add initial order status
-        const initialOrderStatus = await prisma.orderStatus.create({
+        const orderStatus = await prisma.orderStatus.create({
             data: {
                 status: "IN_PROGRESS",
                 kitchenOrderId: kitchenOrder.id,
             }
         });
 
-        if (!initialOrderStatus) {
+        if (!orderStatus) {
             return res.status(500).json({
                 error: {
                     message: "Order status cannot be created"
                 }
             });
         }
+
+        console.log(`Order status added to kitchen order ${kitchenOrder.id} for order ${orderId}`)
 
         // Get order details
         const order = await prisma.order.findUnique({
@@ -81,6 +100,8 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
                 status: true,
             },
         });
+
+        console.log(`Sent order details for order ${orderId}`)
 
         return res.status(200).json({
             data: order
