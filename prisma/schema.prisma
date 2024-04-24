@@ -16,11 +16,11 @@ model Order {
   orderId      String
   userId       String
 
-  items  OrderItem[]
+  items  OrderedItem[]
   status OrderStatus[]
 }
 
-model OrderItem {
+model OrderedItem {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

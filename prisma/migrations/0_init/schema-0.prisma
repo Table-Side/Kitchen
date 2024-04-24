@@ -16,11 +16,11 @@ model Order {
   orderId      String
   userId       String
 
-  items  OrderItem[]
+  items  OrderedItem[]
   status OrderStatus[]
 }
 
-model OrderItem {
+model OrderedItem {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -31,14 +31,12 @@ model OrderItem {
 
   kitchenOrder   Order  @relation(fields: [kitchenOrderId], references: [id])
   kitchenOrderId String
-}
+}`
 
 enum Status {
-  PENDING
   IN_PROGRESS
   CANCELLED
   COMPLETED
-  REJECTED
 }
 
 model OrderStatus {

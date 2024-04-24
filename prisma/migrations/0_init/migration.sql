@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('PENDING', 'IN_PROGRESS', 'CANCELLED', 'COMPLETED', 'REJECTED');
+CREATE TYPE "Status" AS ENUM ('IN_PROGRESS', 'CANCELLED', 'COMPLETED');
 
 -- CreateTable
 CREATE TABLE "Order" (
@@ -14,7 +14,7 @@ CREATE TABLE "Order" (
 );
 
 -- CreateTable
-CREATE TABLE "OrderItem" (
+CREATE TABLE "OrderedItem" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE "OrderItem" (
     "quantity" INTEGER NOT NULL,
     "kitchenOrderId" TEXT NOT NULL,
 
-    CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "OrderedItem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -37,7 +37,7 @@ CREATE TABLE "OrderStatus" (
 );
 
 -- AddForeignKey
-ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_kitchenOrderId_fkey" FOREIGN KEY ("kitchenOrderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrderedItem" ADD CONSTRAINT "OrderedItem_kitchenOrderId_fkey" FOREIGN KEY ("kitchenOrderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderStatus" ADD CONSTRAINT "OrderStatus_kitchenOrderId_fkey" FOREIGN KEY ("kitchenOrderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
