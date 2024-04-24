@@ -3,13 +3,19 @@ import { AuthenticatedRequest } from "../interfaces";
 import prisma from "../config/prisma";
 import { isAuthenticated, hasRole, orderExists } from "../middleware";
 import { Order, Status } from "@prisma/client";
+import { ownsRestaurant } from "../middleware/is_restaurant_owner";
 
 const router = Router({ mergeParams: true });
 
-router.get("/", async (req: AuthenticatedRequest, res: Response) => {
+router.get("/", ownsRestaurant, async (req: AuthenticatedRequest, res: Response) => {
     // Get the details of a specific order
     try {
+        const { restaurantId } = req.params;
+
         const orders = await prisma.order.findMany({
+            where: {
+                restaurantId: restaurantId,
+            },
             include: {
                 items: true,
                 status: true,
@@ -47,7 +53,7 @@ router.get("/", async (req: AuthenticatedRequest, res: Response) => {
     }
 });
 
-router.get("/:orderId", orderExists, async (req: AuthenticatedRequest, res: Response) => {
+router.get("/:orderId", ownsRestaurant, orderExists, async (req: AuthenticatedRequest, res: Response) => {
     // Get the details of a specific order
     try {
         const { orderId } = req.params;
@@ -85,7 +91,7 @@ router.get("/:orderId", orderExists, async (req: AuthenticatedRequest, res: Resp
     }
 });
 
-router.put("/:orderId/:targetStatus", isAuthenticated, hasRole("restaurant"), orderExists, async (req: AuthenticatedRequest, res: Response) => {
+router.put("/:orderId/:targetStatus", ownsRestaurant, orderExists, async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { orderId, targetStatus } = req.params;
 
