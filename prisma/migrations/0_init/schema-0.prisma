@@ -31,7 +31,7 @@ model OrderedItem {
 
   kitchenOrder   Order  @relation(fields: [kitchenOrderId], references: [id])
   kitchenOrderId String
-}`
+}
 
 enum Status {
   IN_PROGRESS
