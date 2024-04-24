@@ -64,7 +64,11 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
                     prettyName: item.displayName,
                     shortName: item.shortName,
                     quantity: matchingOrderedItem.quantity,
-                    kitchenOrderId: kitchenOrder.id,
+                    kitchenOrder: {
+                        connect: {
+                            id: kitchenOrder.id
+                        }
+                    }
                 }
             })
         });
