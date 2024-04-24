@@ -57,7 +57,7 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
         // Create Kitchen Order Items
         const kitchenOrderedItemUpdates = itemDetails.map((item: { id: string, displayName: string, shortName: string }) => {
             // Find corresponding item in order
-            const matchingOrderedItem = items.find((OrderedItem: { itemId: string, quantity: number }) => OrderedItem.itemId === item.id);
+            const matchingOrderedItem = items.find((orderedItem: { itemId: string, quantity: number }) => orderedItem.itemId === item.id);
 
             return prisma.orderedItem.create({
                 data: {
