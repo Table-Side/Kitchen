@@ -15,7 +15,7 @@ export const ownsRestaurant: RequestHandler[] = [
         const restaurantId = req.params.restaurantId;
         const userId = req.user.sub;
         
-        const isOwner = await fetch(`http://${process.env.RESTAURANT_SERVICE_URL ?? 'restaurant:3000'}/restaurant/${restaurantId}/isOwner?userId=${userId}`);
+        const isOwner = await fetch(`http://${process.env.RESTAURANT_SERVICE_URL ?? 'restaurant:3000'}/internal/restaurant/${restaurantId}/isOwner?userId=${userId}`);
 
         if (!isOwner.ok) {
             return res.status(403).json({
