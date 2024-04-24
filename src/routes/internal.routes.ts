@@ -20,7 +20,7 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
                 "Content-Type": "application/json",
                 "X-Request-From": "tableside-kitchen"
             },
-            body: JSON.stringify({ itemIds: itemIds }),
+            body: JSON.stringify({ restaurantId: restaurantId, itemIds: itemIds }),
         });
 
         if (!itemDetailsReq.ok) {
