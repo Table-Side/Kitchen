@@ -4,7 +4,7 @@ import prisma from "../config/prisma";
 import { isAuthenticated, hasRole, orderExists } from "../middleware";
 import { Order, Status } from "@prisma/client";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router.get("/", async (req: AuthenticatedRequest, res: Response) => {
     // Get the details of a specific order

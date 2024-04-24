@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import prisma from "../config/prisma";
 import { OrderedItem } from "@prisma/client";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router.post("/orders/:restaurantId/receive", async (req: Request, res: Response) => {
     // Receive a new order from the order microservice
