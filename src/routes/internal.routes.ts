@@ -54,24 +54,6 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
 
         console.log(`Created kitchen order ${kitchenOrder.id} for order ${orderId}`)
 
-        // Add initial order status
-        const orderStatus = await prisma.orderStatus.create({
-            data: {
-                status: "IN_PROGRESS",
-                kitchenOrderId: kitchenOrder.id,
-            }
-        });
-
-        if (!orderStatus) {
-            return res.status(500).json({
-                error: {
-                    message: "Order status cannot be created"
-                }
-            });
-        }
-
-        console.log(`Order status added to kitchen order ${kitchenOrder.id} for order ${orderId}`)
-
         // Create Kitchen Order Items
         const kitchenOrderedItemUpdates = itemDetails.data.map((item: any) => {
             // Find corresponding item in order
@@ -101,7 +83,6 @@ router.post("/orders/:restaurantId/receive", async (req: Request, res: Response)
             },
             include: {
                 items: true,
-                status: true,
             },
         });
 
