@@ -73,19 +73,26 @@ router.get("/:orderId", ownsRestaurant, orderExists, async (req: AuthenticatedRe
 router.put("/:orderId/finish", ownsRestaurant, orderExists, async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { orderId } = req.params;
+        
+        // Delete order items
+        const orderItems = await prisma.orderedItem.deleteMany({
+            where: {
+                kitchenOrderId: orderId,
+            }
+        });
 
-        // Get new order details
+        // Delete order
         const order = await prisma.order.delete({
             where: {
                 id: orderId,
             },
-            include: {
-                items: true,
-            },
         });
 
         res.status(200).json({
-            data: order
+            data: {
+                ...order,
+                orderItems: orderItems,
+            }
         }); 
     } catch (error) {
         res.status(500).json({
